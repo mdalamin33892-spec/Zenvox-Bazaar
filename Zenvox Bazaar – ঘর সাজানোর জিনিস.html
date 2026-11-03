@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zenvox Bazaar – ঘর সাজানোর জিনিস</title>
+<style>
+:root{--bg:#fbf6ef;--card:#fff;--text:#2b2118;--muted:#7a6a5a;--accent:#c4622d;--accent-t:#fff;--line:#eadfce;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1511;--card:#261e18;--text:#f3e9dd;--muted:#b6a593;--accent:#e0804a;--accent-t:#1b1511;--line:#3a2f26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1511;--card:#261e18;--text:#f3e9dd;--muted:#b6a593;--accent:#e0804a;--accent-t:#1b1511;--line:#3a2f26;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;line-height:1.6}
+header{padding:28px 18px 18px;text-align:center}
+h1{margin:0;font-size:2rem;letter-spacing:.5px;color:var(--accent)}
+header p{margin:6px 0 0;color:var(--muted)}
+nav{display:flex;gap:8px;overflow-x:auto;padding:8px 14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+nav button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 16px;border-radius:99px;font:inherit;cursor:pointer}
+nav button.on{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+main{max-width:980px;margin:0 auto;padding:10px 14px 120px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pic{font-size:3.4rem;text-align:center;padding:26px 0;background:var(--line)}
+.info{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.info b{font-weight:600}
+.price{color:var(--accent);font-weight:700}
+.card button{margin-top:auto;border:0;background:var(--accent);color:var(--accent-t);padding:9px;border-radius:10px;font:inherit;cursor:pointer}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:none;justify-content:space-between;align-items:center;gap:10px}
+.bar.show{display:flex}
+.bar button{border:0;background:var(--accent);color:var(--accent-t);padding:10px 18px;border-radius:10px;font:inherit;cursor:pointer}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);max-width:92vw;width:420px}
+dialog textarea{width:100%;height:150px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
+dialog input{width:100%;margin:6px 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.row{display:flex;gap:8px;margin-top:10px}
+.row button{flex:1;border:0;padding:10px;border-radius:10px;font:inherit;cursor:pointer;background:var(--accent);color:var(--accent-t)}
+.row .alt{background:var(--line);color:var(--text)}
+footer{text-align:center;color:var(--muted);padding:20px;font-size:.9rem}
+</style>
+</head>
+<body>
+<header>
+<h1>Zenvox Bazaar</h1>
+<p>ঘর সাজানোর সুন্দর সব জিনিস</p>
+</header>
+<nav id="tabs"></nav>
+<main><div class="grid" id="grid"></div></main>
+<div class="bar" id="bar"><span id="sum"></span><button onclick="openOrder()">অর্ডার করুন</button></div>
+
+<dialog id="dlg">
+<b>আপনার অর্ডার</b>
+<input id="nm" placeholder="আপনার নাম">
+<input id="ph" placeholder="মোবাইল নম্বর">
+<input id="ad" placeholder="ঠিকানা">
+<textarea id="msg" readonly></textarea>
+<div class="row"><button class="alt" onclick="dlg.close()">বন্ধ</button><button onclick="send()">কপি করে মেসেঞ্জারে পাঠান</button></div>
+<p style="font-size:.85rem;color:var(--muted)">পেমেন্ট: ক্যাশ অন ডেলিভারি / বিকাশ / নগদ</p>
+</dialog>
+
+<footer>© Zenvox Bazaar · ফেসবুক পেজে মেসেজ করুন</footer>
+
+<script>
+// এখানে আপনার ফেসবুক পেজের ইউজারনেম বসান (যেমন "zenvoxbazaar")
+const PAGE = "";
+// পণ্য যোগ করতে এখানে লিখুন, যেমন: {n:"পণ্যের নাম",c:"ক্যাটাগরি",p:৫০০,e:"🎁"}
+const P = [];
+const cats=["সব",...new Set(P.map(x=>x.c))];
+let cur="সব",cart={};
+const $=id=>document.getElementById(id),dlg=$("dlg");
+const bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+function tabs(){if(!P.length){$("tabs").style.display="none";return}$("tabs").innerHTML=cats.map(c=>`<button class="${c===cur?"on":""}" onclick="cur='${c}';tabs();grid()">${c}</button>`).join("")}
+function grid(){if(!P.length){$("grid").innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 10px"><div style="font-size:3rem">🎁</div><h2 style="color:var(--accent);margin:10px 0 4px">শীঘ্রই নতুন পণ্য আসছে</h2><p style="color:var(--muted);margin:0">আমাদের সাথেই থাকুন</p></div>';return}$("grid").innerHTML=P.map((x,i)=>({x,i})).filter(o=>cur==="সব"||o.x.c===cur).map(({x,i})=>`<div class="card"><div class="pic">${x.e}</div><div class="info"><b>${x.n}</b><span class="price">৳${bn(x.p)}</span><button onclick="add(${i})">কার্টে যোগ করুন</button></div></div>`).join("")}
+function add(i){cart[i]=(cart[i]||0)+1;upd()}
+function upd(){let q=0,t=0;for(const i in cart){q+=cart[i];t+=cart[i]*P[i].p}$("bar").classList.toggle("show",q>0);$("sum").textContent=`${bn(q)}টি পণ্য · ৳${bn(t)}`}
+function openOrder(){build();dlg.showModal();["nm","ph","ad"].forEach(i=>$(i).oninput=build)}
+function build(){let t=0,l="অর্ডার – Zenvox Bazaar\n";for(const i in cart){l+=`• ${P[i].n} × ${cart[i]} = ৳${cart[i]*P[i].p}\n`;t+=cart[i]*P[i].p}
+ l+=`মোট: ৳${t}\nনাম: ${$("nm").value}\nমোবাইল: ${$("ph").value}\nঠিকানা: ${$("ad").value}`;$("msg").value=l}
+function send(){build();const t=$("msg").value;try{navigator.clipboard.writeText(t)}catch(e){$("msg").select()}
+ if(PAGE)window.open("https://m.me/"+PAGE,"_blank");else alert("অর্ডার কপি হয়েছে। এখন আমাদের ফেসবুক পেজে মেসেজ করে পেস্ট করুন।")}
+tabs();grid();
+</script>
+</body>
+</html>
